@@ -19,7 +19,6 @@ import com.microsoft.rest.LogLevel;
 /**
  * Azure Compute sample for managing virtual machine from Managed Service Identity (MSI) enabled virtual machine -
  *   - Create a virtual machine using MSI credentials from System assigned or User Assigned MSI enabled VM
- *   - Delete the virtual machine using MSI credentials from System assigned or User Assigned MSI enabled VM.
  */
 public final class ManageVirtualMachineFromMSIEnabledVirtualMachine {
     /**
@@ -31,30 +30,8 @@ public final class ManageVirtualMachineFromMSIEnabledVirtualMachine {
         try {
             final Region region = Region.US_WEST_CENTRAL;
 
-// This sample required to be run from a MSI enabled virtual machine with role
-// based contributor access to the resource group with name "msi-rg-test". MSI
-// enabled VM can be created using service principal credentials as shown below.
-//
-//            final File credFile = new File(System.getenv("AZURE_AUTH_LOCATION"));
-//
-//            Azure azure = Azure.configure()
-//                    .withLogLevel(LogLevel.BODY_AND_HEADERS)
-//                    .authenticate(credFile)
-//                    .withDefaultSubscription(subscriptionId);
-
-//            VirtualMachine virtualMachine = azure.virtualMachines()
-//                    .define("<vm-name>")
-//                    .withRegion(region)
-//                    .withNewResourceGroup(rgName)
-//                    .withNewPrimaryNetwork("10.0.0.0/28")
-//                    .withPrimaryPrivateIPAddressDynamic()
-//                    .withNewPrimaryPublicIPAddress(pipName)
-//                    .withPopularLinuxImage(KnownLinuxVirtualMachineImage.UBUNTU_SERVER_16_04_LTS)
-//                    .withRootUsername("<user-name>")
-//                    .withRootPassword("<password>")
-//                    .withSystemAssignedManagedServiceIdentity()
-//                    .withSystemAssignedIdentityBasedAccessToCurrentResourceGroup(BuiltInRole.CONTRIBUTOR)
-//                    .create();
+            // This sample required to be run from a MSI enabled virtual machine with role
+            // based contributor access to the resource group specified as the second command line argument.
 
             final String usage = "Usage: mvn clean compile exec:java -Dexec.args=\"<subscription-id> <rg-name> [<client-id>]\"";
             if (args.length < 2) {
@@ -62,7 +39,7 @@ public final class ManageVirtualMachineFromMSIEnabledVirtualMachine {
             }
 
             final String subscriptionId = args[0];
-            final String rgName = args[1];
+            final String resourceGroupName = args[1];
             final String clientId = args.length > 2 ? args[2] : null;
             final String linuxVMName = Utils.createRandomName("VM1");
             final String userName = "tirekicker";
@@ -94,7 +71,7 @@ public final class ManageVirtualMachineFromMSIEnabledVirtualMachine {
             VirtualMachine virtualMachine = azure.virtualMachines()
                     .define(linuxVMName)
                     .withRegion(region)
-                    .withExistingResourceGroup(rgName)
+                    .withExistingResourceGroup(resourceGroupName)
                     .withNewPrimaryNetwork("10.0.0.0/28")
                     .withPrimaryPrivateIPAddressDynamic()
                     .withoutPrimaryPublicIPAddress()
@@ -106,15 +83,6 @@ public final class ManageVirtualMachineFromMSIEnabledVirtualMachine {
 
             System.out.println("Created virtual machine using MSI credentials");
             Utils.print(virtualMachine);
-
-            //=============================================================
-            // Delete the VM using MSI credentials
-
-            System.out.println("Deleting the virtual machine using MSI credentials");
-
-            azure.virtualMachines().deleteById(virtualMachine.id());
-
-            System.out.println("Deleted virtual machine");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
